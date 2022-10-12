@@ -6,9 +6,10 @@ exports.isAuthenticated = (req, res, next) => {
 
 	jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
 		if (err) {
-			return res.status(403).json({
+			return res.status(401).json({
+				status: "401 Unauthorized",
 				message:
-					"a client is forbidden from accessing a valid resource",
+					"A client is forbidden from accessing a valid resource",
 			});
 		} else {
 			req.user = user;
@@ -18,17 +19,14 @@ exports.isAuthenticated = (req, res, next) => {
 };
 
 exports.operatorAdmin = (req, res, next) => {
-	const ONLY_OPERATOR_ADMIN = "admin";
-	// TODO: secure token with roles (minor)
 	if (req.user) {
-		if (req.user.role == ONLY_OPERATOR_ADMIN) {
+		if (req.user.role === "Admin") {
 			next();
 		} else {
 			return res.status(403).json({
-				message: "This client only accessed by OperatorAdmin",
+				status: "403 Forbidden",
+				message: "Only Admin can access this resource",
 			});
 		}
-		// console.log(req.user.roles);
 	}
-	next();
 };

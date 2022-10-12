@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { logIn } from '../api/Authentication';
-import loginillustration from '../assets/login-illustration.jpg';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { logIn } from '../../api/Authentication';
+import loginillustration from '../../assets/login-illustration.jpg';
 import { useNavigate } from 'react-router-dom';
-import MessageToast from '../components/Message-Toast';
+import MessageToast from '../../components/Message-Toast';
 
 export default function LoginPage() {
 	const [credential, setCredential] = useState({
@@ -19,6 +19,7 @@ export default function LoginPage() {
 	});
 
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const handleChange = (e) => {
 		const key = e.target.name;
@@ -60,6 +61,24 @@ export default function LoginPage() {
 		}, 1000);
 	};
 
+	const handleAfterSignUp = () => {
+		if (location.state) {
+			setToastState(location.state.toastState);
+			window.history.replaceState({}, document.title);
+			setTimeout(() => {
+				setToastState({
+					...toastState,
+					show: false,
+					title: '',
+					message: '',
+				});
+			}, 5000);
+		}
+	};
+
+	useEffect(() => {
+		handleAfterSignUp();
+	}, []);
 	const style = {
 		page: {
 			padding: '30px',

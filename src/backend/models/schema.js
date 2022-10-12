@@ -19,11 +19,15 @@ exports.UserSchema = mongoose.model("User", {
 	password: String,
 	email: String,
 	salt: String,
+	user: {
+		username: String,
+		email: String,
+	},
 	role: {
 		type: String,
-		enum: ["operator", "admin"],
+		enum: ["Operator", "Admin"],
 		require: true,
-		default: "operator",
+		default: "Operator",
 	},
 });
 
@@ -40,6 +44,10 @@ exports.CarSchema = mongoose.model("Car", {
 	rentPrice: {
 		perDay: Number,
 		perHour: Number,
+	},
+	picture: {
+		data: Buffer,
+		contentType: String,
 	},
 	status: {
 		type: String,
@@ -61,7 +69,7 @@ exports.BorrowSchema = mongoose.model("Borrow", {
 		address: String,
 		phoneNumber: String,
 	},
-	carId: String,
+	carPlateNo: String,
 	daysToBorrow: Number,
 	totalCost: Number,
 	downPayment: Number,

@@ -1,7 +1,21 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 
 const carModel = require("../models/car.model");
+
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, "./uploads");
+	},
+	filename: (req, file, cb) => {
+		cb(null, file.originalname);
+	},
+});
+
+const upload = multer({ storage: storage });
 
 router.get("", async (req, res) => {
 	try {
@@ -35,8 +49,15 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
-router.post("/", async (req, res) => {
-	let payload = req.body;
+router.post("/", upload.single("picture"), async (req, res) => {
+	let payload = JSON.parse(req.body.data);
+	// console.log();
+	payload["picture"] = {
+		data: fs.readFileSync(
+			path.join(__dirname, "..", "/uploads/" + req.file.filename)
+		),
+		contentType: "image/png",
+	};
 
 	payload["user"] = {
 		username: req.user.username,
@@ -58,12 +79,23 @@ router.post("/", async (req, res) => {
 	}
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", upload.single("picture"), async (req, res) => {
+	let payload = JSON.parse(req.body.data);
+	// console.log(req.file);
+	if (req.file) {
+		payload["picture"] = {
+			data: fs.readFileSync(
+				path.join(__dirname, "..", "/uploads/" + req.file.filename)
+			),
+			contentType: "image/png",
+		};
+	}
+
 	try {
 		res.status(201).json({
 			message: "Successfully edit car data",
 			status: "201 OK",
-			data: await carModel.edit(req.params.id, req.body),
+			data: await carModel.edit(req.params.id, payload),
 		});
 	} catch (err) {
 		res.status(404).json({
@@ -74,29 +106,29 @@ router.put("/:id", async (req, res) => {
 	}
 });
 
-router.put("/status/:id", async (req, res) => {
-	try {
-		res.status(201).json({
-			message: "Successfully edit car status data",
-			status: "201 OK",
-			data: await carModel.editCarStatus(req.params.id),
-		});
-	} catch (err) {
-		res.status(404).json({
-			message: "Error to edit car status data",
-			status: "404 NOT FOUND",
-			err,
-		});
-	}
-});
+// router.put("/status/:id", async (req, res) => {
+// 	try {
+// 		res.status(201).json({
+// 			message: "Successfully edit car status data",
+// 			status: "201 OK",
+// 			data: await carModel.editCarStatus(req.params.id),
+// 		});
+// 	} catch (err) {
+// 		res.status(404).json({
+// 			message: "Error to edit car status data",
+// 			status: "404 NOT FOUND",
+// 			err,
+// 		});
+// 	}
+// });
 
 router.delete("/:id", async (req, res) => {
-	console.log(req.params.id);
 	try {
-		res.status(204).json({
+		await carModel.delete(req.params.id);
+
+		res.status(200).json({
 			message: "Successfully delete car data",
 			status: "204 NO CONTENT",
-			data: await carModel.delete(req.params.id),
 		});
 	} catch (err) {
 		res.status(404).json({

@@ -22,7 +22,8 @@ exports.getAll = (query) => {
 			} else {
 				resolve(result);
 			}
-		}).limit(limit ? limit : 10);
+		});
+		//.limit(limit ? limit : 10)
 	});
 };
 

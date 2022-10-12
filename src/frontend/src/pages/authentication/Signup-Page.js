@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { signUp } from '../api/Authentication';
-import Loader from '../components/Loader';
-import loginillustration from '../assets/login-illustration.jpg';
-import MessageToast from '../components/Message-Toast';
+import { Link, useNavigate } from 'react-router-dom';
+import { signUp } from '../../api/Authentication';
+import Loader from '../../components/Loader';
+import loginillustration from '../../assets/login-illustration.jpg';
+import MessageToast from '../../components/Message-Toast';
 
 export default function SignupPage() {
 	const [user, setUser] = useState({
 		username: '',
 		email: '',
-		role: '',
 		password: '',
 		passwordconfirm: '',
 	});
@@ -21,6 +20,8 @@ export default function SignupPage() {
 		message: '',
 	});
 
+	const navigate = useNavigate();
+
 	const handleChange = (e) => {
 		const key = e.target.name;
 		const value = e.target.value;
@@ -31,7 +32,7 @@ export default function SignupPage() {
 		});
 	};
 
-	const handleLogIn = async (e) => {
+	const handleSignUp = async (e) => {
 		setIsLoading(true);
 		e.preventDefault();
 
@@ -39,7 +40,23 @@ export default function SignupPage() {
 
 		setTimeout(() => {
 			setIsLoading(false);
-			if (response.err) {
+			setUser({
+				username: '',
+				email: '',
+				password: '',
+				passwordconfirm: '',
+			});
+			if (response.status.includes('201')) {
+				navigate('/login', {
+					state: {
+						toastState: {
+							show: true,
+							title: 'Success',
+							message: response.message,
+						},
+					},
+				});
+			} else {
 				setToastState({
 					...toastState,
 					show: true,
@@ -54,7 +71,6 @@ export default function SignupPage() {
 						message: '',
 					});
 				}, 5000);
-			} else {
 			}
 		}, 1000);
 	};
@@ -120,7 +136,7 @@ export default function SignupPage() {
 					>
 						Sign Up Car Rent App
 					</h3>
-					<form onSubmit={handleLogIn}>
+					<form onSubmit={handleSignUp}>
 						<div className="mb-3">
 							<label
 								htmlFor="username"
@@ -139,31 +155,6 @@ export default function SignupPage() {
 								onChange={handleChange}
 								placeholder="input your username"
 							/>
-						</div>
-						<div className="mb-3">
-							<label
-								htmlFor="role"
-								className="form-label"
-								style={style.label}
-							>
-								Role
-							</label>
-							<select
-								class="form-select"
-								id="role"
-								name="role"
-								style={style.input}
-								value={user.role || ''}
-								onChange={handleChange}
-							>
-								<option
-									selected
-									value="operator"
-								>
-									Operator
-								</option>
-								<option value="admin">Admin</option>
-							</select>
 						</div>
 						<div className="mb-3">
 							<label
@@ -206,7 +197,7 @@ export default function SignupPage() {
 						</div>
 						<div className="mb-4">
 							<label
-								htmlFor="password"
+								htmlFor="passwordconfirm"
 								className="form-label"
 								style={style.label}
 							>
@@ -234,7 +225,6 @@ export default function SignupPage() {
 									style={style.button}
 									disabled={
 										user.username === '' ||
-										user.role === '' ||
 										user.email === '' ||
 										user.password === '' ||
 										user.passwordconfirm === '' ||

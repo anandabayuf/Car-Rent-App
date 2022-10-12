@@ -10,6 +10,7 @@ const app = express();
 const port = 3001;
 
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 controllers(app);

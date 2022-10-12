@@ -1,58 +1,83 @@
 const schema = require("./schema");
-const crypto = require("crypto");
-const jwt = require("jsonwebtoken");
 
-exports.save = (data) => {
-	data.salt = crypto.randomBytes(16).toString("hex");
-	data.password = crypto
-		.pbkdf2Sync(data.password, data.salt, 1000, 64, `sha512`)
-		.toString(`hex`);
-
+exports.create = (data) => {
 	return new Promise((resolve, reject) => {
 		new schema.UserSchema(data).save((err, response) => {
 			if (err) {
 				reject(err);
 			} else {
-				let { password, salt, ...result } = data;
+				resolve(response);
+			}
+		});
+	});
+};
 
+exports.getAll = (query) => {
+	let { limit, ...search } = query;
+
+	return new Promise((resolve, reject) => {
+		schema.UserSchema.find(search, (err, result) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(result);
+			}
+		});
+		//.limit(limit ? limit : 10)
+	});
+};
+
+exports.getById = (id) => {
+	return new Promise((resolve, reject) => {
+		schema.UserSchema.findById(id, (err, result) => {
+			if (err) {
+				reject(err);
+			} else {
 				resolve(result);
 			}
 		});
 	});
 };
 
-exports.authenticate = (data) => {
-	let { username, password } = data;
-
+exports.edit = (id, data, usernameLoggedIn) => {
 	return new Promise((resolve, reject) => {
-		schema.UserSchema.findOne({ username }, (err, response) => {
-			if (err) {
-				reject(err);
-			}
-
-			if (response) {
-				let passwordFromDB = response.password;
-				let passwordFromUser = crypto
-					.pbkdf2Sync(password, response.salt, 1000, 64, `sha512`)
-					.toString(`hex`);
-
-				if (passwordFromDB == passwordFromUser) {
-					const data = {
-						id: response._id,
-						username: response.username,
-						email: response.email,
-						role: response.role,
-					};
-					const token = jwt.sign(data, process.env.SECRET_KEY, {
-						expiresIn: "86400s",
-						algorithm: "HS256",
-					});
-					resolve({ token });
+		this.getById(id)
+			.then((findByIdRes) => {
+				if (findByIdRes.username === usernameLoggedIn) {
+					reject({ message: "Cannot update signed in user" });
 				} else {
-					reject({ message: "Wrong Password!" });
+					schema.UserSchema.findByIdAndUpdate(
+						id,
+						data,
+						(err, result) => {
+							if (err) {
+								reject(err);
+							} else {
+								this.getById(id)
+									.then((res) => resolve(res))
+									.catch((e) => reject(e));
+							}
+						}
+					);
 				}
+			})
+			.catch((err) => reject(err));
+	});
+};
+
+exports.delete = (id, usernameLoggedIn) => {
+	return new Promise((resolve, reject) => {
+		this.getById(id).then((findByIdRes) => {
+			if (findByIdRes.username === usernameLoggedIn) {
+				reject({ message: "Cannot delete signed in user" });
 			} else {
-				reject({ message: "Wrong Username!" });
+				schema.UserSchema.findByIdAndDelete(id, (err, result) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(result);
+					}
+				});
 			}
 		});
 	});
