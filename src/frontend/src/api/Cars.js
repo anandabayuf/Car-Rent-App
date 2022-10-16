@@ -45,6 +45,21 @@ const searchCar = async (category, query) => {
 	}
 };
 
+const getAvailableCars = async () => {
+	try {
+		const response = await fetch(`${BASE_URL}/car?status=Available`, {
+			headers: {
+				Authorization: localStorage.getItem('TOKEN'),
+			},
+		});
+		const responseJson = await response.json();
+
+		return responseJson;
+	} catch (err) {
+		alert(err);
+	}
+};
+
 const createCar = async (data) => {
 	const formData = new FormData();
 
@@ -112,4 +127,12 @@ const deleteCar = async (id) => {
 	}
 };
 
-export { getAllCars, getCarById, searchCar, createCar, updateCar, deleteCar };
+export {
+	getAllCars,
+	getCarById,
+	searchCar,
+	getAvailableCars,
+	createCar,
+	updateCar,
+	deleteCar,
+};

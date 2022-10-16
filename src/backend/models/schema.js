@@ -62,7 +62,7 @@ exports.CarSchema = mongoose.model("Car", {
 });
 
 exports.BorrowSchema = mongoose.model("Borrow", {
-	date: { type: Date, default: Date.now }, //when they do book
+	unixBookDate: Number, //when they do book //date and time
 	customer: {
 		name: String,
 		ID: String,
@@ -71,16 +71,18 @@ exports.BorrowSchema = mongoose.model("Borrow", {
 	},
 	carPlateNo: String,
 	daysToBorrow: Number,
+	hoursToBorrow: Number,
 	totalCost: Number,
 	downPayment: Number,
 	remains: Number,
 	status: {
 		type: String,
-		enum: ["On Doing", "Done"],
+		enum: ["Booked", "On Doing", "Done", "Returned"],
 		require: true,
-		default: "On Doing",
+		default: "Booked",
 	},
-	departDate: { type: Date, default: Date.now }, //when they book
+	unixDepartDate: Number, //date and time
+	unixReturnDate: Number,
 	user: {
 		username: String,
 		email: String,

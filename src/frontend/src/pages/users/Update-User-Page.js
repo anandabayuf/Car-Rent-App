@@ -30,9 +30,9 @@ export default function UpdateUserPage() {
 		setIsFetching(true);
 		const response = await getUserById(params.id);
 
-		if (response.status.includes('401')) {
-			setTimeout(() => {
-				setIsFetching(false);
+		setTimeout(async () => {
+			setIsFetching(false);
+			if (response.status.includes('401')) {
 				localStorage.removeItem('TOKEN');
 				navigate('/login', {
 					state: {
@@ -43,22 +43,33 @@ export default function UpdateUserPage() {
 						},
 					},
 				});
-			}, 1000);
-		} else {
-			const data = await response.data;
+			} else if (response.status.includes('200')) {
+				const data = await response.data;
 
-			const { _id, _v, ...rest } = data;
+				const { _id, _v, ...rest } = data;
 
-			rest['password'] = '';
-			rest['passwordConfirm'] = '';
-			rest['isEditPassword'] = false;
+				rest['password'] = '';
+				rest['passwordConfirm'] = '';
+				rest['isEditPassword'] = false;
 
-			setUser(rest);
-
-			setTimeout(() => {
-				setIsFetching(false);
-			}, 1000);
-		}
+				setUser(rest);
+			} else {
+				setToastState({
+					...toastState,
+					show: true,
+					title: 'Error',
+					message: response.message,
+				});
+				setTimeout(() => {
+					setToastState({
+						...toastState,
+						show: false,
+						title: '',
+						message: '',
+					});
+				}, 5000);
+			}
+		}, 1000);
 	};
 
 	useEffect(() => {
@@ -93,9 +104,10 @@ export default function UpdateUserPage() {
 
 		const response = await updateUser(params.id, data);
 
-		if (response.status.includes('401')) {
-			setTimeout(() => {
-				setIsLoading(false);
+		setTimeout(() => {
+			setIsLoading(false);
+
+			if (response.status.includes('401')) {
 				localStorage.removeItem('TOKEN');
 				navigate('/login', {
 					state: {
@@ -106,46 +118,33 @@ export default function UpdateUserPage() {
 						},
 					},
 				});
-			}, 1000);
-		} else {
-			setTimeout(() => {
-				setIsLoading(false);
-				if (response.status.includes('201')) {
-					setUser({
-						username: '',
-						email: '',
-						role: 'Operator',
-						isEditPassword: false,
-						password: '',
-						passwordConfirm: '',
-					});
-					navigate('/master/users', {
-						state: {
-							toastState: {
-								show: true,
-								title: 'Success',
-								message: response.message,
-							},
+			} else if (response.status.includes('201')) {
+				navigate('/master/users', {
+					state: {
+						toastState: {
+							show: true,
+							title: 'Success',
+							message: response.message,
 						},
-					});
-				} else {
+					},
+				});
+			} else {
+				setToastState({
+					...toastState,
+					show: true,
+					title: 'Error',
+					message: response.message,
+				});
+				setTimeout(() => {
 					setToastState({
 						...toastState,
-						show: true,
-						title: 'Error',
-						message: response.message,
+						show: false,
+						title: '',
+						message: '',
 					});
-					setTimeout(() => {
-						setToastState({
-							...toastState,
-							show: false,
-							title: '',
-							message: '',
-						});
-					}, 5000);
-				}
-			}, 1000);
-		}
+				}, 5000);
+			}
+		}, 1000);
 	};
 
 	const handleCancel = () => {

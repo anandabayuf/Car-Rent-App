@@ -38,12 +38,13 @@ export default function CreateUserPage() {
 		e.preventDefault();
 
 		const { passwordConfirm, ...data } = user;
-		console.log(data);
+		// console.log(data);
 		const response = await createUser(data);
 
-		if (response.status.includes('401')) {
-			setTimeout(() => {
-				setIsLoading(false);
+		setTimeout(() => {
+			setIsLoading(false);
+
+			if (response.status.includes('401')) {
 				localStorage.removeItem('TOKEN');
 				navigate('/login', {
 					state: {
@@ -54,45 +55,33 @@ export default function CreateUserPage() {
 						},
 					},
 				});
-			}, 1000);
-		} else {
-			setTimeout(() => {
-				setIsLoading(false);
-				if (response.status.includes('201')) {
-					setUser({
-						username: '',
-						email: '',
-						role: 'Operator',
-						password: '',
-						passwordConfirm: '',
-					});
-					navigate('/master/users', {
-						state: {
-							toastState: {
-								show: true,
-								title: 'Success',
-								message: response.message,
-							},
+			} else if (response.status.includes('201')) {
+				navigate('/master/users', {
+					state: {
+						toastState: {
+							show: true,
+							title: 'Success',
+							message: response.message,
 						},
-					});
-				} else {
+					},
+				});
+			} else {
+				setToastState({
+					...toastState,
+					show: true,
+					title: 'Error',
+					message: response.message,
+				});
+				setTimeout(() => {
 					setToastState({
 						...toastState,
-						show: true,
-						title: 'Error',
-						message: response.message,
+						show: false,
+						title: '',
+						message: '',
 					});
-					setTimeout(() => {
-						setToastState({
-							...toastState,
-							show: false,
-							title: '',
-							message: '',
-						});
-					}, 5000);
-				}
-			}, 1000);
-		}
+				}, 5000);
+			}
+		}, 1000);
 	};
 
 	const handleCancel = () => {

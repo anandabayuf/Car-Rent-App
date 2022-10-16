@@ -35,9 +35,10 @@ export default function UpdateCarPage() {
 		setIsFetching(true);
 		const response = await getCarById(params.id);
 
-		if (response.status.includes('401')) {
-			setTimeout(() => {
-				setIsFetching(false);
+		setTimeout(async () => {
+			setIsFetching(false);
+
+			if (response.status.includes('401')) {
 				localStorage.removeItem('TOKEN');
 				navigate('/login', {
 					state: {
@@ -48,35 +49,46 @@ export default function UpdateCarPage() {
 						},
 					},
 				});
-			}, 1000);
-		} else {
-			const data = await response.data;
+			} else if (response.status.includes('404')) {
+				setToastState({
+					...toastState,
+					show: true,
+					title: 'Error',
+					message: response.message,
+				});
+				setTimeout(() => {
+					setToastState({
+						...toastState,
+						show: false,
+						title: '',
+						message: '',
+					});
+				}, 5000);
+			} else {
+				const data = await response.data;
 
-			const { rentPrice, ...rest } = data;
+				const { rentPrice, ...rest } = data;
 
-			rest['perDay'] = rentPrice.perDay;
-			rest['perHour'] = rentPrice.perHour;
+				rest['perDay'] = rentPrice.perDay;
+				rest['perHour'] = rentPrice.perHour;
 
-			rest['pictureFromDB'] = data.picture;
+				rest['pictureFromDB'] = data.picture;
 
-			rest['base64String'] = btoa(
-				new Uint8Array(data.picture.data.data).reduce(function (
-					data,
-					byte
-				) {
-					return data + String.fromCharCode(byte);
-				},
-				'')
-			);
+				rest['base64String'] = btoa(
+					new Uint8Array(data.picture.data.data).reduce(function (
+						data,
+						byte
+					) {
+						return data + String.fromCharCode(byte);
+					},
+					'')
+				);
 
-			rest['picture'] = undefined;
+				rest['picture'] = undefined;
 
-			setCar(rest);
-
-			setTimeout(() => {
-				setIsFetching(false);
-			}, 1000);
-		}
+				setCar(rest);
+			}
+		}, 1000);
 	};
 
 	useEffect(() => {
@@ -162,9 +174,10 @@ export default function UpdateCarPage() {
 
 		const response = await updateCar(params.id, data);
 
-		if (response.status.includes('401')) {
-			setTimeout(() => {
-				setIsLoading(false);
+		setTimeout(() => {
+			setIsLoading(false);
+
+			if (response.status.includes('401')) {
 				localStorage.removeItem('TOKEN');
 				navigate('/login', {
 					state: {
@@ -175,48 +188,33 @@ export default function UpdateCarPage() {
 						},
 					},
 				});
-			}, 1000);
-		} else {
-			setTimeout(() => {
-				setIsLoading(false);
-				if (response.status.includes('201')) {
-					setCar({
-						plateNo: '',
-						brand: '',
-						type: '',
-						year: '',
-						perDay: '',
-						perHour: '',
-						picture: undefined,
-					});
-					setPicPreview(undefined);
-					navigate('/master/cars', {
-						state: {
-							toastState: {
-								show: true,
-								title: 'Success',
-								message: response.message,
-							},
+			} else if (response.status.includes('201')) {
+				navigate('/master/cars', {
+					state: {
+						toastState: {
+							show: true,
+							title: 'Success',
+							message: response.message,
 						},
-					});
-				} else {
+					},
+				});
+			} else {
+				setToastState({
+					...toastState,
+					show: true,
+					title: 'Error',
+					message: response.message,
+				});
+				setTimeout(() => {
 					setToastState({
 						...toastState,
-						show: true,
-						title: 'Error',
-						message: response.message,
+						show: false,
+						title: '',
+						message: '',
 					});
-					setTimeout(() => {
-						setToastState({
-							...toastState,
-							show: false,
-							title: '',
-							message: '',
-						});
-					}, 5000);
-				}
-			}, 1000);
-		}
+				}, 5000);
+			}
+		}, 1000);
 	};
 
 	const handleCancel = () => {

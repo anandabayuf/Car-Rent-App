@@ -6,32 +6,6 @@ import { useEffect, useState } from 'react';
 import { checkToken } from '../api/Authentication';
 
 export default function SideBar(props) {
-	const [loggedInUser, setLoggedInUser] = useState(null);
-
-	const navigate = useNavigate();
-
-	const getLoggedInUser = async () => {
-		const response = await checkToken();
-
-		if (response.status.includes('200')) {
-			setLoggedInUser(response.data);
-		} else {
-			navigate('/login', {
-				state: {
-					toastState: {
-						show: true,
-						title: 'Session Expired',
-						message: 'Your session has expired, please login',
-					},
-				},
-			});
-		}
-	};
-
-	useEffect(() => {
-		getLoggedInUser();
-	}, []);
-
 	return (
 		<Offcanvas
 			show={props.show}
@@ -55,17 +29,15 @@ export default function SideBar(props) {
 										Cars Master
 									</Link>
 								</li>
-								{loggedInUser && loggedInUser.role === 'Admin' && (
-									<li className="nav-item">
-										<Link
-											className="nav-link"
-											to="master/users"
-											onClick={props.handleClose}
-										>
-											Users Master
-										</Link>
-									</li>
-								)}
+								<li className="nav-item">
+									<Link
+										className="nav-link"
+										to="master/users"
+										onClick={props.handleClose}
+									>
+										Users Master
+									</Link>
+								</li>
 							</Nav>
 						</Accordion.Body>
 					</Accordion.Item>
@@ -76,10 +48,10 @@ export default function SideBar(props) {
 								<li className="nav-item">
 									<Link
 										className="nav-link"
-										to="transaction"
+										to="transaction/borrows"
 										onClick={props.handleClose}
 									>
-										Rent a Car
+										Borrows List
 									</Link>
 								</li>
 							</Nav>

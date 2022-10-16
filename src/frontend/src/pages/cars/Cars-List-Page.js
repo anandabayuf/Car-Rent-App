@@ -32,9 +32,9 @@ export default function CarsListPage() {
 		setIsFetching(true);
 		const response = await getAllCars();
 
-		if (response.status.includes('401')) {
-			setTimeout(() => {
-				setIsFetching(false);
+		setTimeout(async () => {
+			setIsFetching(false);
+			if (response.status.includes('401')) {
 				localStorage.removeItem('TOKEN');
 				navigate('/login', {
 					state: {
@@ -45,16 +45,28 @@ export default function CarsListPage() {
 						},
 					},
 				});
-			}, 1000);
-		} else {
-			const data = await response.data;
+			} else if (response.status.includes('404')) {
+				setToastState({
+					...toastState,
+					show: true,
+					title: 'Error',
+					message: response.message,
+				});
 
-			setCars(data);
+				setTimeout(() => {
+					setToastState({
+						...toastState,
+						show: false,
+						title: '',
+						message: '',
+					});
+				}, 5000);
+			} else {
+				const data = await response.data;
 
-			setTimeout(() => {
-				setIsFetching(false);
-			}, 1000);
-		}
+				setCars(data);
+			}
+		}, 1000);
 	};
 
 	useEffect(() => {
@@ -130,6 +142,11 @@ export default function CarsListPage() {
 
 	const handleClickEdit = (id) => {
 		navigate(`/master/cars/update/${id}`);
+	};
+
+	const handleClickDetail = (car) => {
+		setCar(car);
+		setDetailCarModalState(true);
 	};
 
 	const style = {
@@ -233,12 +250,11 @@ export default function CarsListPage() {
 																style={
 																	style.button
 																}
-																onClick={() => {
-																	setCar(el);
-																	setDetailCarModalState(
-																		true
-																	);
-																}}
+																onClick={() =>
+																	handleClickDetail(
+																		el
+																	)
+																}
 															>
 																<Eye
 																	size={16}
@@ -283,7 +299,15 @@ export default function CarsListPage() {
 													</div>
 												) : (
 													<div>
-														<button className="btn btn-outline-info">
+														<button
+															className="btn btn-outline-info"
+															style={style.button}
+															onClick={() =>
+																handleClickDetail(
+																	el
+																)
+															}
+														>
 															<Eye size={16} />
 														</button>
 													</div>

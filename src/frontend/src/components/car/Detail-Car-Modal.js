@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Badge, Modal } from 'react-bootstrap';
+import { idrFormat } from '../../utils/Formatter';
 
 export default function DetailCarModal(props) {
 	const [base64String, setBase64String] = useState('');
@@ -31,94 +32,12 @@ export default function DetailCarModal(props) {
 					Detail Car
 				</Modal.Title>
 			</Modal.Header>
-			<Modal.Body>
-				<div className="mb-3 text-center">
-					<img
-						src={`data:image/png;base64,${base64String}`}
-						width={300}
-						alt="car picture"
-					/>
-				</div>
-				<div className="mb-3">
-					<h5>Car Plate Number</h5>
-					<p>
-						<strong>{props.car.plateNo}</strong>
-					</p>
-				</div>
-				<div className="mb-3">
-					<div className="row">
-						<div className="col">
-							<h5>Brand</h5>
-							<p>{props.car.brand}</p>
-						</div>
-						<div className="col">
-							<h5>Type</h5>
-							<p>{props.car.type}</p>
-						</div>
-						<div className="col">
-							<h5>Year</h5>
-							<p>{props.car.year}</p>
-						</div>
+			<Modal.Body style={{ padding: '20px 50px 50px 50px' }}>
+				<div className="row justify-content-between">
+					<div className="col-auto">
+						<h5>Car Information</h5>
 					</div>
-				</div>
-				<div className="mb-3">
-					<h5>Rent Price</h5>
-					<div className="row">
-						<div className="col">
-							<div className="row">
-								<div className="col">
-									<p>Per Day: </p>
-								</div>
-								<div className="col">
-									<p>
-										{props.car.rentPrice.perDay.toLocaleString(
-											'id-ID',
-											{
-												style: 'currency',
-												currency: 'IDR',
-												minimumFractionDigits: 0,
-											}
-										)}
-									</p>
-								</div>
-							</div>
-						</div>
-						<div className="col">
-							<div className="row">
-								<div className="col">
-									<p>Per Hour: </p>
-								</div>
-								<div className="col">
-									<p>
-										{props.car.rentPrice.perHour.toLocaleString(
-											'id-ID',
-											{
-												style: 'currency',
-												currency: 'IDR',
-												minimumFractionDigits: 0,
-											}
-										)}
-									</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div className="mb-3">
-					<h5>Status</h5>
-					<Badge
-						bg={
-							props.car.status === 'Available'
-								? 'success'
-								: 'secondary'
-						}
-					>
-						{props.car.status}
-					</Badge>
-				</div>
-				{props.car.status === 'Not Available' ? (
-					<div className="mb-3">
-						<h5>Status</h5>
+					<div className="col-auto">
 						<Badge
 							bg={
 								props.car.status === 'Available'
@@ -129,30 +48,60 @@ export default function DetailCarModal(props) {
 							{props.car.status}
 						</Badge>
 					</div>
-				) : (
-					<></>
-				)}
+				</div>
+				<div className="mb-3 text-center">
+					<img
+						src={`data:image/png;base64,${base64String}`}
+						width={300}
+						alt="car picture"
+					/>
+				</div>
 				<div className="mb-3">
-					<h5>Added By</h5>
 					<div className="row">
 						<div className="col">
-							<div className="row">
-								<div className="col-auto">
-									<p>Username: </p>
-								</div>
-								<div className="col-auto">
-									<p>{props.car.user.username}</p>
-								</div>
+							<div className="mb-3">
+								<h6>Brand</h6>
+								<p>{props.car.brand}</p>
+							</div>
+							<div className="mb-3">
+								<h6>Type</h6>
+								<p>{props.car.type}</p>
+							</div>
+							<div className="mb-3">
+								<h6>Year</h6>
+								<p>{props.car.year}</p>
 							</div>
 						</div>
 						<div className="col">
-							<div className="row">
-								<div className="col-auto">
-									<p>Email: </p>
-								</div>
-								<div className="col-auto">
-									<p>{props.car.user.email}</p>
-								</div>
+							<div className="mb-3">
+								<h6>Plate Number</h6>
+								<p>{props.car.plateNo}</p>
+							</div>
+							<div className="mb-3">
+								<h6>Rent Price Per Day</h6>
+								<p>{idrFormat(props.car.rentPrice.perDay)}</p>
+							</div>
+							<div className="mb-3">
+								<h6>Rent Price Per Hour</h6>
+								<p>{idrFormat(props.car.rentPrice.perHour)}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr />
+				<div>
+					<h5 className="mb-3">Created By</h5>
+					<div className="row">
+						<div className="col">
+							<div>
+								<h6>Username</h6>
+								<p>{props.car.user.username}</p>
+							</div>
+						</div>
+						<div className="col">
+							<div>
+								<h6>Email</h6>
+								<p>{props.car.user.email}</p>
 							</div>
 						</div>
 					</div>

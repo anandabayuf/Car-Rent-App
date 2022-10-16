@@ -29,9 +29,10 @@ export default function UserListPage() {
 		setIsFetching(true);
 		const response = await getAllUsers();
 
-		if (response.status.includes('401')) {
-			setTimeout(() => {
-				setIsFetching(false);
+		setTimeout(async () => {
+			setIsFetching(false);
+
+			if (response.status.includes('401')) {
 				localStorage.removeItem('TOKEN');
 				navigate('/login', {
 					state: {
@@ -42,15 +43,26 @@ export default function UserListPage() {
 						},
 					},
 				});
-			}, 1000);
-		} else {
-			const data = await response.data;
-			setUsers(data);
-
-			setTimeout(() => {
-				setIsFetching(false);
-			}, 1000);
-		}
+			} else if (response.status.includes('200')) {
+				const data = await response.data;
+				setUsers(data);
+			} else {
+				setToastState({
+					...toastState,
+					show: true,
+					title: 'Error',
+					message: response.message,
+				});
+				setTimeout(() => {
+					setToastState({
+						...toastState,
+						show: false,
+						title: '',
+						message: '',
+					});
+				}, 5000);
+			}
+		}, 1000);
 	};
 
 	useEffect(() => {

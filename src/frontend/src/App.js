@@ -16,6 +16,8 @@ import UpdateCarPage from './pages/cars/Update-Car-Page';
 import UserListPage from './pages/users/User-List-Page';
 import CreateUserPage from './pages/users/Create-User-Page';
 import UpdateUserPage from './pages/users/Update-User-Page';
+import BorrowsListPage from './pages/borrow/Borrow-List';
+import CreateBorrowPage from './pages/borrow/Create-Borrow-Page';
 
 const Protected = () => {
 	const [isAuthenticated, setIsAuthenticated] = useState(
@@ -37,7 +39,11 @@ const AccessLoginPageHandler = () => {
 		localStorage.getItem('TOKEN')
 	);
 
-	return isAuthenticated ? <Navigate to="/" /> : <LoginPage />;
+	return isAuthenticated ? (
+		<Navigate to="/transaction/borrows" />
+	) : (
+		<LoginPage />
+	);
 };
 
 const AccessSignupPageHandler = () => {
@@ -45,7 +51,11 @@ const AccessSignupPageHandler = () => {
 		localStorage.getItem('TOKEN')
 	);
 
-	return isAuthenticated ? <Navigate to="/" /> : <SignupPage />;
+	return isAuthenticated ? (
+		<Navigate to="/transaction/borrows" />
+	) : (
+		<SignupPage />
+	);
 };
 
 function App() {
@@ -56,10 +66,18 @@ function App() {
 					path="/"
 					element={<Protected />}
 				>
-					<Route
-						index
-						element={<DashboardPage />}
-					/>
+					<Route path="transaction">
+						<Route path="borrows">
+							<Route
+								index
+								element={<BorrowsListPage />}
+							/>
+							<Route
+								path="create"
+								element={<CreateBorrowPage />}
+							/>
+						</Route>
+					</Route>
 					<Route path="master">
 						<Route path="cars">
 							<Route
@@ -101,7 +119,7 @@ function App() {
 				/>
 				<Route
 					path="*"
-					element={<Navigate to="/" />}
+					element={<Navigate to="/transaction/borrows" />}
 				/>
 			</Routes>
 		</BrowserRouter>

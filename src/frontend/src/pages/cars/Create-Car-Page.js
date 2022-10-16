@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createCar } from '../../api/Cars';
 import Loader from '../../components/Loader';
 import MessageToast from '../../components/Message-Toast';
+import DateTimePicker from 'react-datetime-picker';
 
 export default function CreateCarPage() {
 	const [car, setCar] = useState({
@@ -15,6 +16,19 @@ export default function CreateCarPage() {
 		picture: undefined,
 	});
 	const [picPreview, setPicPreview] = useState('');
+	// const [value, onChange] = useState(new Date());
+
+	// useEffect(() => {
+	// 	const epochUnix = new Date().getTime() / 1000;
+
+	// 	console.log(typeof epochUnix);
+
+	// 	const date = new Date(0); // The 0 there is the key, which sets the date to the epoch
+	// 	date.setUTCSeconds(epochUnix);
+
+	// 	console.log(date);
+	// 	// console.log(Math.floor(value.getTime() / 1000));
+	// }, [value]);
 
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -68,9 +82,10 @@ export default function CreateCarPage() {
 
 		const response = await createCar(data);
 
-		if (response.status.includes('401')) {
-			setTimeout(() => {
-				setIsLoading(false);
+		setTimeout(() => {
+			setIsLoading(false);
+
+			if (response.status.includes('401')) {
 				localStorage.removeItem('TOKEN');
 				navigate('/login', {
 					state: {
@@ -81,48 +96,33 @@ export default function CreateCarPage() {
 						},
 					},
 				});
-			}, 1000);
-		} else {
-			setTimeout(() => {
-				setIsLoading(false);
-				if (response.status.includes('201')) {
-					setCar({
-						plateNo: '',
-						brand: '',
-						type: '',
-						year: '',
-						perDay: '',
-						perHour: '',
-						picture: '',
-					});
-					setPicPreview('');
-					navigate('/master/cars', {
-						state: {
-							toastState: {
-								show: true,
-								title: 'Success',
-								message: response.message,
-							},
+			} else if (response.status.includes('201')) {
+				navigate('/master/cars', {
+					state: {
+						toastState: {
+							show: true,
+							title: 'Success',
+							message: response.message,
 						},
-					});
-				} else {
+					},
+				});
+			} else {
+				setToastState({
+					...toastState,
+					show: true,
+					title: 'Error',
+					message: response.message,
+				});
+				setTimeout(() => {
 					setToastState({
 						...toastState,
-						show: true,
-						title: 'Error',
-						message: response.message,
+						show: false,
+						title: '',
+						message: '',
 					});
-					setTimeout(() => {
-						setToastState({
-							...toastState,
-							show: false,
-							title: '',
-							message: '',
-						});
-					}, 5000);
-				}
-			}, 1000);
-		}
+				}, 5000);
+			}
+		}, 1000);
 	};
 
 	const handleCancel = () => {
@@ -171,6 +171,12 @@ export default function CreateCarPage() {
 					Create Car
 				</h3>
 				<form onSubmit={handleSubmit}>
+					{/* <div className="mb-3">
+						<DateTimePicker
+							onChange={onChange}
+							value={value}
+						/>
+					</div> */}
 					<div className="mb-3">
 						<label
 							htmlFor="plateNo"
